@@ -1,0 +1,155 @@
+User
+-Company Name
+-Name
+-email
+-phone
+
+Customer
+-Name
+-phone
+-email
+-address[](?)
+-instructions
+
+Service
+-Customer row
+-type: monthly | bimonthly | quarterly | one time | call back | follow up | inspection
+-price? 
+
+Job
+-date
+-service row
+-notes
+-chemical
+
+Chemical?
+epa api?
+
+
+what would happen if a customer cancelled services with one provider and started with another?
+Check if customer exists in db, if yes change company_id to match new company
+
+why is billing address needed?
+
+// Company - Represents the single business entity using the app
+Company
+- id (PK)
+- name (e.g., "Rafael's Pest Control LLC")
+- legal_name (if different)
+- business_email
+- business_phone
+- business_address_line1
+- business_city
+- business_state_province
+- business_postal_code
+- country (e.g., "USA")
+- stripe_account_id
+// - logo_url
+// - default_invoice_terms
+
+// User - The single proprietor
+User
+- id (PK)
+- company_id (FK to Company) // 1-to-1 relationship for now
+- name (The proprietor's name)
+- email (Proprietor's login email)
+- phone (Proprietor's phone)
+// - password_hash (for authentication)
+
+// Customer - The person or entity receiving services
+Customer
+- id (PK)
+- company_id (FK to Company)
+- name
+- email
+- phone
+- stripe_customer_id (Stripe's ID for this customer)
+// - primary_contact_name (if different from customer.name)
+// - default_billing_address_id (FK to Address, if customer has many addresses)
+
+// Address - A specific location associated with a Customer
+Address
+- id (PK)
+- customer_id (FK to Customer)
+- street_address_line1
+- street_address_line2 (nullable)
+- city
+- state_province
+- postal_code
+- country
+- instructions (e.g., "gate code 1234", "dog in yard", "enter from back alley")
+- is_primary (boolean, indicates default address for this customer)
+// - latitude (optional, populated by geocoding)
+// - longitude (optional, populated by geocoding)
+
+// ServicePlan - Defines a recurring or standard service offering for an Address
+ServicePlan
+- id (PK)
+- address_id (FK to Address)
+- type: monthly | bimonthly | quarterly | one_time | inspection | callback
+- description (e.g., "Standard Pest Control - Quarterly")
+- price (The base price for this specific plan)
+- next_service_date (for recurring plans, when the next job is due)
+- active (boolean, if the plan is currently active)
+// - frequency_interval_months (integer, e.g., 1 for monthly, 3 for quarterly)
+// - last_service_date (when was the last job completed for this plan)
+// - created_at, updated_at (timestamps for auditing)
+
+// Job - A specific instance of work performed or scheduled
+Job
+- id (PK)
+- service_plan_id (FK to ServicePlan, nullable, for scheduled jobs)
+- customer_id (FK to Customer) // Always linked to a customer
+- address_id (FK to Address) // Always linked to an address
+- user_id (FK to User, who performed/is assigned the job, which is the proprietor)
+- scheduled_date
+- completed_date (nullable, when the job was actually done)
+- status: scheduled | in_progress | completed | cancelled | rescheduled
+- notes_for_customer (can be shown on invoice or sent to customer)
+- chemicals_used
+- internal_notes
+- actual_price_charged (can override default_price from ServicePlan)
+// - duration_minutes (optional, how long it took)
+// - created_at, updated_at (timestamps for auditing)
+
+// Invoice - Represents a bill issued to a Customer
+Invoice
+- id (PK)
+- company_id (FK to Company)
+- customer_id (FK to Customer)
+- address_id (FK to Address) // The address this invoice pertains to
+- invoice_number (unique, human-readable)
+- issue_date
+- due_date
+- total_amount
+- amount_paid
+- balance_due
+- status: draft | open | paid | void | uncollectible
+- stripe_invoice_id (Stripe's ID for this invoice)
+// - pdf_url (link to the generated invoice PDF)
+// - created_at, updated_at
+
+// LineItem - Details of what's on an Invoice (e.g., a service performed)
+LineItem
+- id (PK)
+- invoice_id (FK to Invoice)
+- job_id (FK to Job, nullable - an invoice can have items not directly tied to a job)
+- description (e.g., "Monthly Pest Control Service - May 2025")
+- quantity (e.g., 1)
+- unit_price
+- subtotal
+// - tax_rate (optional)
+// - created_at, updated_at
+
+// Payment - Records a payment made against an Invoice
+Payment
+- id (PK)
+- invoice_id (FK to Invoice)
+- company_id (FK to Company) // Denormalized for easier querying, but could be derived from Invoice
+- amount
+- payment_date
+- method: card | cash | check | bank_transfer
+- stripe_charge_id (Stripe's ID if via Stripe)
+- status: succeeded | failed | pending | refunded
+// - user_id (FK to User, who recorded the payment, i.e., the proprietor)
+// - created_at, updated_at
