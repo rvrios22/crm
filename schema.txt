@@ -38,11 +38,6 @@ Company
 - legal_name (if different)
 - business_email
 - business_phone
-- business_address_line1
-- business_city
-- business_state_province
-- business_postal_code
-- country (e.g., "USA")
 - stripe_account_id
 // - logo_url
 // - default_invoice_terms
