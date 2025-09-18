@@ -3,7 +3,7 @@
 import { Button, Form, Input, addToast } from "@heroui/react";
 import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 
@@ -15,13 +15,29 @@ export default function Page() {
     companyEmail: "",
     companyPhone: "",
   });
-  const createCompany = useMutation(api.companies.mutations.createCompany);
-  const updateUserComapnyId = useMutation(api.users.mutations.updateUser);
   const router = useRouter();
+
+  const createCompany = useMutation(api.companies.mutations.createCompany);
+  const updateUser = useMutation(api.users.mutations.updateUser);
+
+  const convexUserByClerkId = useQuery(api.users.queries.getUserByClerkId, {
+    clerk_id: user?.id || "",
+  });
+  
+  const addCompanyIdToUser = async (companyId: string) => {
+    try {
+      if (!convexUserByClerkId?._id) {
+        throw new Error("User ID is undefined");
+      }
+      await updateUser({ id: convexUserByClerkId._id, company_id: companyId });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleCreateCompany = async () => {
     try {
-      await createCompany({
+      const companyId = await createCompany({
         company_name: companyData.comapnyName,
         company_email:
           companyData.companyEmail ||
@@ -30,13 +46,12 @@ export default function Page() {
             : user?.primaryEmailAddress?.emailAddress || ""),
         comapny_phone: companyData.companyPhone,
       });
+      await addCompanyIdToUser(companyId)
     } catch (err) {
       console.error(err);
     }
   };
 
-  const addCompanyIdToUser = async () => {
-  }
 
   if (!isLoaded) {
     return <div>Loading...</div>;

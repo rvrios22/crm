@@ -11,7 +11,7 @@ const findEmail = (primaryEmailId: string, emails: any[]) => {
 export async function POST(req: NextRequest) {
   try {
     const evt = await verifyWebhook(req);
-    const newUser = await fetchMutation(api.users.mutations.createUser, {
+    await fetchMutation(api.users.mutations.createUser, {
       name: `${evt.data.first_name} ${evt.data.last_name}`,
       phone: "",
       email: findEmail(
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       clerk_id: evt.data.id,
       company_id: null,
     });
-    console.log(newUser);
+    return new Response("Webhook received", { status: 200 });
   } catch (err) {
     console.error("Error verifying webhook:", err);
     return new Response("Error verifying webhook", { status: 400 });

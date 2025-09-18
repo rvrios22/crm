@@ -30,12 +30,12 @@ export const updateUser = mutation({
     company_id: v.optional(v.union(v.null(), v.string())),
   },
   handler: async (ctx, args) => {
-    const { id } = args;
-    await ctx.db.patch(id, {
-      name: args.name,
-      email: args.email,
-      phone: args.phone,
-      company_id: args.company_id,
-    });
+    const { id, name, email, phone, company_id } = args;
+    const patch: Record<string, any> = {};
+    if (name !== undefined) patch.name = name;
+    if (email !== undefined) patch.email = email;
+    if (phone !== undefined) patch.phone = phone;
+    if (company_id !== undefined) patch.company_id = company_id;
+    await ctx.db.patch(id, patch);
   },
 });
