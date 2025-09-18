@@ -16,6 +16,7 @@ export default function Page() {
     companyPhone: "",
   });
   const createCompany = useMutation(api.companies.mutations.createCompany);
+  const updateUserComapnyId = useMutation(api.users.mutations.updateUser);
   const router = useRouter();
 
   const handleCreateCompany = async () => {
@@ -29,14 +30,13 @@ export default function Page() {
             : user?.primaryEmailAddress?.emailAddress || ""),
         comapny_phone: companyData.companyPhone,
       });
-      addToast({ title: "Company Created" });
-      setCompanyData({ comapnyName: "", companyEmail: "", companyPhone: "" });
-      setIsloading(false);
-      router.push("/schedule");
     } catch (err) {
       console.error(err);
     }
   };
+
+  const addCompanyIdToUser = async () => {
+  }
 
   if (!isLoaded) {
     return <div>Loading...</div>;
@@ -54,6 +54,8 @@ export default function Page() {
           e.preventDefault();
           setIsloading(true);
           handleCreateCompany();
+          setIsloading(false);
+          router.push("/schedule");
         }}
       >
         <Input
