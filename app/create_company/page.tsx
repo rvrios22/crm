@@ -5,28 +5,33 @@ import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const { isSignedIn, user, isLoaded } = useUser();
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [companyData, setCompanyData] = useState({
     comapnyName: "",
-    companyEmail:
-      typeof user?.primaryEmailAddress === "string"
-        ? user.primaryEmailAddress
-        : user?.primaryEmailAddress?.emailAddress || "",
+    companyEmail: "",
     companyPhone: "",
   });
   const createCompany = useMutation(api.companies.mutations.createCompany);
+  const router = useRouter();
 
   const handleCreateCompany = async () => {
     try {
       await createCompany({
         company_name: companyData.comapnyName,
-        company_email: companyData.companyEmail,
+        company_email:
+          companyData.companyEmail ||
+          (typeof user?.primaryEmailAddress === "string"
+            ? user.primaryEmailAddress
+            : user?.primaryEmailAddress?.emailAddress || ""),
         comapny_phone: companyData.companyPhone,
       });
       setCompanyData({ comapnyName: "", companyEmail: "", companyPhone: "" });
+      setIsloading(false);
+      router.push("/schedule");
     } catch (err) {
       console.error(err);
     }
@@ -48,7 +53,6 @@ export default function Page() {
           e.preventDefault();
           setIsloading(true);
           handleCreateCompany();
-          setIsloading(false);
         }}
       >
         <Input
@@ -73,7 +77,6 @@ export default function Page() {
               : user.primaryEmailAddress?.emailAddress ||
                 "Enter your business email"
           }
-          isRequired
           label="Company Email (if different than gmail)"
           labelPlacement="outside"
           type="text"
