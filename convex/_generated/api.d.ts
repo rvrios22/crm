@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as companies_mutations from "../companies/mutations.js";
 import type * as users_mutations from "../users/mutations.js";
 
 /**
@@ -24,6 +25,7 @@ import type * as users_mutations from "../users/mutations.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "companies/mutations": typeof companies_mutations;
   "users/mutations": typeof users_mutations;
 }>;
 export declare const api: FilterApi<

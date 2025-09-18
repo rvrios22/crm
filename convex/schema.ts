@@ -10,8 +10,8 @@ export default defineSchema({
     company_id: v.union(v.null(), v.string()),
   }),
   companies: defineTable({
-    name: v.string(),
-    business_email: v.string(),
-    business_phone: v.optional(v.string()),
+    company_name: v.string(),
+    company_email: v.string(),
+    company_phone: v.optional(v.string()),
   })
 });
