@@ -20,3 +20,22 @@ export const createUser = mutation({
     return newUser;
   },
 });
+
+export const updateUser = mutation({
+  args: {
+    id: v.id("users"),
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    company_id: v.union(v.null(), v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { id } = args;
+    await ctx.db.patch(id, {
+      name: args.name,
+      email: args.email,
+      phone: args.phone,
+      company_id: args.company_id,
+    });
+  },
+});

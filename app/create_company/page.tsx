@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Form, Input } from "@heroui/react";
+import { Button, Form, Input, addToast } from "@heroui/react";
 import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { useMutation } from "convex/react";
@@ -29,6 +29,7 @@ export default function Page() {
             : user?.primaryEmailAddress?.emailAddress || ""),
         comapny_phone: companyData.companyPhone,
       });
+      addToast({ title: "Company Created" });
       setCompanyData({ comapnyName: "", companyEmail: "", companyPhone: "" });
       setIsloading(false);
       router.push("/schedule");
